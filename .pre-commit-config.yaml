@@ -1,0 +1,56 @@
+
+default_language_version:
+  python: python3.12
+
+repos:
+  # general checks (see here: https://pre-commit.com/hooks.html)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+      # default limit is 500 KB; raised so small assets (images, figures) can be committed,
+      # while still catching accidental checkpoints / datasets
+      - id: check-added-large-files
+        args: [--maxkb=10240]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: debug-statements
+      - id: check-ast
+      - id: check-json
+      - id: detect-private-key
+
+  # keep uv.lock in sync with pyproject.toml
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.10
+    hooks:
+      - id: uv-lock
+
+  # ruff - linting + formatting (rev pinned to match the `ruff` dev
+  # dependency in uv.lock, so pre-commit and local runs agree)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.17.1"
+    hooks:
+      # `ruff` is the legacy alias of `ruff-check`
+      - id: ruff-check
+        args: [ --fix ]
+      - id: ruff-format
+
+  # mypy - lint-like type checking. Run through `uv run` (rather than
+  # mirrors-mypy's isolated env) so it uses the exact mypy version and
+  # project dependencies (torch, wandb, ...) from uv.lock -- otherwise
+  # every torch/wandb import fails to resolve.
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        # pre-commit otherwise splits files across parallel mypy processes, which race on
+        # .mypy_cache and give inconsistent cross-module results
+        require_serial: true

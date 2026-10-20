@@ -1,0 +1,95 @@
+[project]
+name = "painting_change_map"
+version = "0.1.0"
+description = "Painting Change Map as guidance for generating painting processes."
+readme = "README.md"
+authors = [
+    { name = "Markus Pobitzer", email = "17593719+Markus-Pobitzer@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "av>=19.0.1",
+    "controlnet-aux>=0.0.10",
+    "numpy>=2.5.4",
+    "pillow>=13.0.0",
+    "torch>=2.11.0",
+    "torchvision>=0.26.0",
+    "transformers>=5.20.1",
+]
+
+
+[build-system]
+build-backend = 'setuptools.build_meta'
+requires = [
+    'setuptools',
+]
+
+[dependency-groups]
+# The notebooks under dev_notebooks/ need a kernel. Declared rather than installed ad hoc, because
+# `uv sync` prunes anything undeclared -- an ad-hoc ipykernel disappears the first time anyone syncs.
+notebook = [
+    "ipykernel>=6.29",
+    "ipywidgets>=8.1",
+    "jupyterlab>=4.2",
+    "matplotlib>=3.11.2",
+    # The H5 dataset under src/painting_change_map/dataset/ is not part of the release
+    "h5py>=3.16.0",
+]
+dev = [
+    "mypy>=1.16.1",
+    "pre-commit>=4.2.0",
+    "ruff>=0.12.2",
+]
+
+[tool.ruff]
+line-length = 119
+
+
+[tool.ruff.lint]
+# Never enforce `E501` (line length violations).
+ignore = ["C901", "E501", "E741", "F402", "F823" ]
+select = ["C", "E", "F", "I", "W"]
+
+# Ignore import violations in all `__init__.py` files.
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403", "F811"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+
+# Forces cuda 12 for older GPUs
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu128", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+torchvision = [
+  { index = "pytorch-cu128", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+
+# ML libraries that ship no type information.
+[[tool.mypy.overrides]]
+module = [
+    "transformers.*",
+    "controlnet_aux.*",
+    "h5py.*",
+]
+ignore_missing_imports = true
