@@ -21,6 +21,8 @@ red encodes the time of the last change (brighter = earlier, black = untouched c
 - **Interp. & Lineart**: all changes up to the current frame, over the whole painting process.
 - **Local Interp. & Lineart**: only the changes since the previous frame, so new strokes stand out.
 
+![Change map modes GIF](assets/combined.gif)
+
 ## Usage
 
 Requires Python >= 3.12 and [uv](https://docs.astral.sh/uv/).
